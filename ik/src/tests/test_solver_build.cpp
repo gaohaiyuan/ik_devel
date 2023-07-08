@@ -146,14 +146,21 @@ TEST_F(NAME, no_action_if_tree_has_no_algorithms)
 
 TEST_F(NAME, check_refcounts_are_correct)
 {
-    // TODO
     ik::Ref<ik_bone> tree = tree_with_two_effectors();
     ik::Ref<ik_solver> solver = ik_solver_build(tree);
+    EXPECT_THAT(solver->refcount->refs, Eq(1));
+
+    ik::Ref<ik_solver> another(solver);
+    EXPECT_THAT(solver->refcount->refs, Eq(2));
+    another.reset();
+    EXPECT_THAT(solver->refcount->refs, Eq(1));
+
     ASSERT_THAT(solver.isNull(), IsFalse());
     ASSERT_THAT(solver->algorithm, NotNull());
     EXPECT_THAT(solver->algorithm->type, StrEq("dummy1"));
 
     EXPECT_THAT(solver->refcount->refs, Eq(1));
+    EXPECT_THAT(solver->refcount->obj_count, Eq(1));
 }
 
 TEST_F(NAME, always_find_root_most_algorithm)
